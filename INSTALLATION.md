@@ -1,54 +1,44 @@
 # Installer gParoisse sur un nouvel ordinateur
 
-gParoisse est une application qui tourne entièrement en local : les
-données restent sur l'ordinateur qui l'exécute (voir « Sauvegarde &
-synchro » dans l'application pour échanger des données entre postes).
-Pas d'abonnement, pas de serveur à payer — juste ce dépôt de code.
+gParoisse tourne entièrement en local : les données restent sur
+l'ordinateur qui l'exécute. Aucune installation de dépendances n'est
+nécessaire (pas de `npm install`) : un seul prérequis, Node.js, utilisé
+uniquement pour servir les fichiers de l'application sur
+`http://localhost`.
 
 ## Prérequis
 
-- **Windows 10/11** (Mac et Linux fonctionnent aussi, voir la note en
+- **Windows 10/11** (macOS et Linux fonctionnent aussi, voir la note en
   bas de page).
-- **Node.js** (version 20 ou plus récente) — gratuit, à installer une
-  seule fois : https://nodejs.org (choisir la version « LTS »).
-- **Git** — gratuit, pour récupérer le code : https://git-scm.com/downloads
-  (ou télécharger le code en ZIP depuis GitHub, voir plus bas).
+- **Node.js** — gratuit, à installer une seule fois :
+  https://nodejs.org (choisir la version « LTS »).
+- **Git**, ou à défaut le bouton « Download ZIP » sur GitHub.
 
 ## Installation (une seule fois)
 
-1. Installer Node.js en suivant l'installateur (options par défaut).
-2. Installer Git en suivant l'installateur (options par défaut).
-3. Ouvrir une invite de commandes (touche Windows, taper `cmd`, Entrée)
-   et se placer dans le dossier où l'on veut ranger l'application, par
-   exemple :
+1. Installer Node.js (options par défaut de l'installateur), puis
+   redémarrer l'ordinateur si l'installateur le demande.
+2. Récupérer le code, par exemple dans une invite de commandes
+   (touche Windows, taper `cmd`, Entrée) :
    ```
    cd Documents
-   ```
-4. Récupérer le code :
-   ```
    git clone https://github.com/paroissecarmaux/gP.git
-   cd gP
    ```
-   (Sans Git : télécharger le ZIP depuis
-   https://github.com/paroissecarmaux/gP → bouton vert « Code » →
-   « Download ZIP », puis extraire le dossier.)
-5. Double-cliquer sur `demarrer-gParoisse.bat` à la racine du dossier.
-   Au premier lancement, l'installation des composants prend quelques
-   minutes (barre de progression dans la fenêtre noire) ; l'application
-   s'ouvre ensuite automatiquement dans le navigateur.
+   (Sans Git : bouton vert « Code » → « Download ZIP » sur
+   https://github.com/paroissecarmaux/gP, puis extraire le dossier.)
+3. Double-cliquer sur `demarrer-gParoisse.bat`, à la racine du dossier
+   `gP`. L'application s'ouvre directement dans le navigateur — pas
+   d'attente d'installation, il n'y a rien à télécharger d'autre.
 
 ## Utilisation au quotidien
 
-Double-cliquer sur `demarrer-gParoisse.bat`. L'application s'ouvre dans
-le navigateur après quelques secondes. Pour l'arrêter, fermer la fenêtre
-noire (invite de commandes) qui s'est ouverte à côté.
-
-Ne pas fermer cette fenêtre noire pendant l'utilisation : c'est elle qui
-fait fonctionner l'application.
+Double-cliquer sur `demarrer-gParoisse.bat`. Ne pas fermer la fenêtre
+noire qui s'ouvre à côté du navigateur : c'est elle qui fait fonctionner
+l'application. La fermer arrête gParoisse.
 
 ## Mettre à jour l'application
 
-Quand du nouveau code est disponible sur GitHub, dans le dossier `gP` :
+Dans le dossier `gP` :
 ```
 git pull
 ```
@@ -56,33 +46,31 @@ puis relancer `demarrer-gParoisse.bat` normalement.
 
 ## Problèmes fréquents
 
-- **« Node.js n'est pas installé »** au lancement du `.bat` : Node.js
-  n'a pas été installé, ou l'ordinateur n'a pas été redémarré depuis.
-  Réinstaller depuis https://nodejs.org, redémarrer, réessayer.
-- **La fenêtre se ferme immédiatement** : rouvrir une invite de
-  commandes manuellement, se placer dans le dossier `gP` (`cd chemin\vers\gP`)
-  et taper `demarrer-gParoisse.bat` pour voir le message d'erreur complet.
-- **Le navigateur affiche « Impossible d'accéder à ce site »** : attendre
-  quelques secondes de plus, ou ouvrir manuellement
-  http://localhost:5173 une fois que la fenêtre noire affiche `ready`.
+- **« Node.js n'est pas installé »** : Node.js n'a pas été installé, ou
+  l'ordinateur n'a pas redémarré depuis. Réinstaller depuis
+  https://nodejs.org, redémarrer, réessayer.
+- **« Le port 5500 est déjà utilisé »** : gParoisse tourne probablement
+  déjà — ouvrir http://localhost:5500 dans le navigateur au lieu de
+  relancer.
+- **Le navigateur ne s'ouvre pas tout seul** : ouvrir manuellement
+  http://localhost:5500 une fois que la fenêtre noire affiche
+  « gParoisse est prêt ».
 - **Antivirus/pare-feu** : Node.js peut déclencher une alerte au premier
-  lancement (accès réseau local) ; autoriser l'accès, l'application ne
-  communique qu'avec elle-même sur cet ordinateur (`localhost`).
+  lancement (accès réseau local) ; autoriser l'accès — gParoisse ne
+  communique qu'avec lui-même sur cet ordinateur (`localhost`), jamais
+  vers l'extérieur.
 
 ## Les données restent sur cet ordinateur
 
 Chaque installation de gParoisse a ses propres données locales
-(navigateur, IndexedDB). Pour partager les données entre plusieurs
-postes (ex. secrétariat + presbytère), utiliser l'écran
-**Sauvegarde & synchro** dans l'application : il permet d'exporter un
-fichier de sauvegarde sur un poste et de l'importer sur l'autre pour
-fusionner les données.
+(IndexedDB, dans le navigateur). La synchronisation entre plusieurs
+postes (secrétariat, presbytère…) est prévue en V10 — voir
+[docs/SYNCHRONIZATION.md](docs/SYNCHRONIZATION.md).
 
-## Mac / Linux
+## macOS / Linux
 
-Les étapes sont identiques, dans un Terminal plutôt qu'une invite de
-commandes, en remplaçant l'étape 5 par :
+Étapes identiques, dans un Terminal plutôt qu'une invite de commandes, en
+remplaçant l'étape 3 par :
 ```
-npm install
-npm run dev
+node serve.js
 ```

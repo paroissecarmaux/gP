@@ -1,0 +1,123 @@
+:root {
+  color-scheme: light dark;
+  --color-bg: light-dark(#ffffff, #1a1a1a);
+  --color-bg-subtle: light-dark(#f5f5f3, #242422);
+  --color-text: light-dark(#1c1c1a, #f0f0ec);
+  --color-text-muted: light-dark(#5c5b56, #a8a79f);
+  --color-border: light-dark(#dddad3, #38372f);
+  --color-primary: light-dark(#2b5d4c, #6fc2a3);
+  --color-primary-ink: light-dark(#ffffff, #0e1a15);
+  --color-danger: light-dark(#8a1f1a, #f3a29d);
+  --color-danger-bg: light-dark(#fde2e1, #4a1f1e);
+  --color-info-bg: light-dark(#eef1ef, #22271f);
+  --radius: 8px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  background: var(--color-bg);
+  color: var(--color-text);
+  line-height: 1.5;
+}
+
+h1,
+h2,
+h3 {
+  margin: 0 0 0.5rem;
+  line-height: 1.25;
+}
+
+p {
+  margin: 0 0 0.75rem;
+}
+
+a {
+  color: var(--color-primary);
+}
+
+code {
+  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+  font-size: 0.85em;
+  background: var(--color-bg-subtle);
+  padding: 0.1em 0.4em;
+  border-radius: 4px;
+}
+
+.app-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 0.75rem 1.25rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.app-title {
+  font-weight: 700;
+  font-size: 1.1rem;
+  text-decoration: none;
+  color: var(--color-text);
+}
+
+.app-nav ul {
+  list-style: none;
+  display: flex;
+  gap: 1rem;
+  margin: 0;
+  padding: 0;
+}
+
+.app-nav a {
+  text-decoration: none;
+  color: var(--color-text-muted);
+  font-size: 0.95rem;
+  padding: 0.3rem 0.1rem;
+}
+
+.app-nav a:hover {
+  color: var(--color-text);
+}
+
+.app-outlet {
+  flex: 1;
+  padding: 1.5rem 1.25rem 3rem;
+  max-width: 760px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.page-intro {
+  color: var(--color-text-muted);
+  max-width: 62ch;
+}
+
+.field-list {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.3rem 1rem;
+  margin: 0;
+}
+
+.field-list dt {
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.field-list dd {
+  margin: 0;
+}

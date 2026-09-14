@@ -1,0 +1,21 @@
+@media (max-width: 640px) {
+  .app-header {
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
+  }
+
+  .app-nav ul {
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
+  }
+
+  .app-outlet {
+    padding: 1.25rem 1rem 2.5rem;
+  }
+
+  .notifications {
+    left: 1rem;
+    right: 1rem;
+    max-width: none;
+  }
+}
