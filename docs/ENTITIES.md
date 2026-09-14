@@ -1,10 +1,10 @@
 # Catalogue des entités — gParoisse
 
-Ce document liste **toutes** les entités prévues par le cahier des charges
-(section 6), au-delà de la V1, pour que chaque version future s'appuie sur
-un modèle déjà pensé plutôt que de l'improviser au fil de l'eau (mission
-V1, étapes 1 à 9 : analyser avant de coder). Seule `Installation` est
-implémentée à ce stade — voir [ROADMAP.md](ROADMAP.md) pour le calendrier.
+Ce document liste **toutes** les entités du cahier des charges (section
+6). Toutes sont désormais implémentées (V1 à V11 livrées — voir
+[ROADMAP.md](ROADMAP.md)) ; ce catalogue, écrit dès la V1 avant de coder
+la suite (mission V1, étapes 1 à 9 : analyser avant de coder), a servi de
+plan tout du long et reste la référence du modèle de données.
 
 Sauf mention contraire, chaque entité porte les métadonnées standard
 (`id`, `createdAt`, `updatedAt`, `deletedAt`, `originInstallationId`,

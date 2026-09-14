@@ -30,4 +30,6 @@
     groupsAddMember: addMember,
     groupsRemoveMember: removeMember,
   });
+
+  gP.db.registerEntity({ key: 'groups', label: 'Groupe', repository: groupRepository, searchFields: ['name'], path: '/annuaire/groupes' });
 })(window.gP);

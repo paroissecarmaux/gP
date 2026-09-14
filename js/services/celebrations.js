@@ -70,4 +70,6 @@
     findConflictsFor,
     findAllConflicts,
   });
+
+  gP.db.registerEntity({ key: 'celebrations', label: 'Célébration', repository: celebrationRepository, searchFields: ['title', 'type'], path: '/agenda/celebrations' });
 })(window.gP);

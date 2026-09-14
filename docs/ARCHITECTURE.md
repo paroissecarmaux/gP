@@ -26,17 +26,33 @@ charges.
 │   │   ├── database.js       Instance Dexie + ouverture
 │   │   ├── schema.js          Définition des tables, une entrée par version
 │   │   ├── migrations.js       Application des versions à l'instance Dexie
-│   │   └── repository.js        CRUD générique + métadonnées (depuis V2)
+│   │   ├── repository.js        CRUD générique + métadonnées + historique (depuis V2/V9)
+│   │   └── registry.js           Registre transversal des entités (depuis V9)
 │   ├── services/             Logique métier, un fichier par domaine
 │   │   ├── installation.js
-│   │   ├── people.js          Personne + profils bénévole/clergé/salarié
-│   │   ├── families.js         Famille + membres
-│   │   ├── functions.js         Fonction + affectations
-│   │   ├── groups.js             Groupe + participations
-│   │   ├── contacts.js            Coordonnée (partagée Personne/Famille)
-│   │   ├── territory.js            Secteur + Clocher + Lieu
-│   │   ├── agenda.js                Événement + Participation (polymorphe)
-│   │   └── celebrations.js           Célébration + récurrence + conflits
+│   │   ├── history.js          Historique transversal (V9)
+│   │   ├── people.js            Personne + profils bénévole/clergé/salarié
+│   │   ├── families.js           Famille + membres
+│   │   ├── functions.js           Fonction + affectations
+│   │   ├── groups.js               Groupe + participations
+│   │   ├── contacts.js              Coordonnée (partagée Personne/Famille)
+│   │   ├── territory.js              Secteur + Clocher + Lieu
+│   │   ├── agenda.js                  Événement + Participation (polymorphe)
+│   │   ├── celebrations.js             Célébration + récurrence + conflits
+│   │   ├── tasks.js                     Tâche + affectations (V4)
+│   │   ├── intentions.js                 Intention de messe (V5)
+│   │   ├── payments.js                    Paiement (V5)
+│   │   ├── secretariat.js                  Demande secrétariat (V6)
+│   │   ├── sacraments.js                    Registre + Acte + Mention (V7)
+│   │   ├── certificates.js                   Journal des certificats (V7)
+│   │   ├── collections.js                     Collecte/Comptage/Remise (V8)
+│   │   ├── suppliers.js                        Fournisseur (V9)
+│   │   ├── documents.js                         Document (V9)
+│   │   ├── trash.js                              Corbeille (V9)
+│   │   ├── search.js                              Recherche globale (V10)
+│   │   ├── synchronization.js                      Sauvegarde/fusion/conflits (V10)
+│   │   ├── statistics.js                            KPI du tableau de bord (V10)
+│   │   └── liturgy.js                                Calendrier liturgique (V11)
 │   ├── ui/
 │   │   ├── components.js       Component, AppShell, ListView, FormView
 │   │   ├── router.js            Routeur hash avec paramètres
@@ -51,16 +67,8 @@ charges.
 │       ├── indexBy.js             Indexation par id, options de <select> statiques
 │       ├── validation.js           Validation centralisée
 │       └── errors.js                Hiérarchie d'erreurs + gestion centralisée
-├── pages/                  Écrans, un module par page/route
-│   ├── dashboard.js
-│   ├── people.js            Liste + fiche riche (coordonnées, fonctions, profils)
-│   ├── families.js           Liste + fiche riche (membres)
-│   ├── groups.js              Liste + fiche riche (membres)
-│   ├── functions.js            Liste + formulaire (CRUD simple)
-│   ├── territory.js             Secteurs/Clochers/Lieux (CRUD simple)
-│   ├── agenda.js                  Vue calendrier Jour/Semaine/Mois + filtres
-│   ├── evenements.js               Liste + fiche (participants)
-│   └── celebrations.js              Liste + fiche (récurrence, conflits, participants)
+├── pages/                  Écrans, un module par page/route (un fichier par
+│                           domaine, miroir de services/)
 ├── docs/                   Cette documentation
 └── scripts/
     └── push-to-github.ps1
@@ -177,6 +185,23 @@ récurrence interprétée à l'affichage : plus simple, et cohérent avec la
 suppression douce (annuler UNE occurrence a un sens ; annuler une portion
 d'une règle abstraite, beaucoup moins).
 
+### Registre transversal + historique automatique — V9
+
+`js/db/registry.js` introduit `registerEntity({ key, label, repository,
+searchFields, path })` : chaque service s'y enregistre à son chargement.
+La Corbeille (`pages/trash.js`), la Recherche globale
+(`js/services/search.js`) et, plus tard, tout écran transversal
+s'appuient sur ce registre plutôt que sur une liste d'entités codée en
+dur — ajouter une entité à une future version la rend automatiquement
+visible dans la Corbeille et la Recherche, sans toucher à ces pages.
+
+Dans le même esprit, `js/db/repository.js` a été enrichi pour journaliser
+automatiquement (`js/services/history.js`) chaque
+création/modification/suppression/restauration, pour **toute** entité
+passée par `Repository` — y compris celles des versions précédentes
+(V2/V3), sans modification de leur code. `Repository.hardDelete()` (purge
+définitive, réservée à la Corbeille) a été ajouté à cette version.
+
 ### Piège de fuseau horaire dans le regroupement par jour
 
 Détecté par les tests de bout en bout pendant le développement de la V3,
@@ -193,6 +218,43 @@ locales que la grille (`getFullYear`/`getMonth`/`getDate`), jamais de
 garder pour toute future fonctionnalité manipulant des dates par « jour »
 plutôt que par instant précis.
 
+### Fusion par `revision` seule : insuffisant — algorithme revu en V10
+
+Conçu initialement autour du compteur `revision` (« révision entrante
+supérieure → intégrer »), l'algorithme de fusion
+(`js/services/synchronization.js`) a été testé avec deux installations
+simulées (deux contextes de navigateur isolés, deux bases IndexedDB
+distinctes) échangeant de vrais fichiers de sauvegarde — et non en se
+fiant au seul raisonnement. Le test a révélé un cas faux-négatif réel :
+si les deux côtés éditent indépendamment le même enregistrement depuis le
+dernier échange, chacun incrémente `revision` de 1 → les deux arrivent à
+la **même** révision avec un contenu **différent**. Comparer uniquement
+`revision` classait alors ce cas en « rien à faire », faisant disparaître
+silencieusement la modification d'un des deux côtés — exactement ce que
+la section 7 du cahier des charges interdit.
+
+Algorithme corrigé : la décision compare `updatedAt` de chaque côté à la
+date du dernier échange avec **cette installation précise**
+(`localSettings` clé `lastSyncWith:<installationId>`), pas `revision`.
+Revérifié par le même test (fusion propre quand un seul côté a changé,
+conflit détecté quand les deux ont changé différemment, silencieux quand
+les deux ont changé vers un résultat identique) avant d'être considéré
+fiable.
+
+### Piège JavaScript : `event.currentTarget` après un `await`
+
+Trouvé par le même test de synchronisation (erreur console en conditions
+réelles, pas en relecture de code) : `SyncPage.handleImport()`
+(`pages/synchronization.js`) lisait `event.currentTarget` dans un bloc
+`finally`, **après** un `await`. Or `Event.currentTarget` redevient
+`null` une fois la phase de dispatch de l'événement terminée — ce qui
+arrive dès qu'un gestionnaire d'événement `async` franchit son premier
+`await` et rend la main à la boucle d'événements. Corrigé en capturant
+l'élément dans une variable locale **avant** le premier `await`, seul
+moment où `event.currentTarget` est garanti non nul. Le reste du code
+base suit déjà cette règle (`const form = event.currentTarget;` en toute
+première ligne des gestionnaires) ; seul cet endroit y dérogeait.
+
 ## Composants et navigation
 
 `Component` (`js/ui/components.js`) sépare `render()` (construction du
@@ -207,8 +269,10 @@ indépendamment de l'ordre d'enregistrement — nécessaire dès qu'un module
 ajoute une vue filtrée sous un chemin déjà couvert par une route à
 paramètre (ex. `/taches/en-retard` face à `/taches/:id`).
 
-La navigation V1 est volontairement minimale (un seul module : le tableau
-de bord), conformément à la mission V1 du cahier des charges.
+La navigation V1 était volontairement minimale (un seul module : le
+tableau de bord), conformément à la mission V1 du cahier des charges ;
+elle s'est étoffée au fil des versions, chacune ajoutant ses entrées sans
+toucher au routeur lui-même.
 
 ## Gestion des erreurs et notifications
 
@@ -224,12 +288,43 @@ de confirmation) sous forme de bandeaux non bloquants.
 
 Voir [DATABASE.md](DATABASE.md) et [MIGRATIONS.md](MIGRATIONS.md).
 
-## Modèle de données prévu
+## Modèle de données
 
-Voir [ENTITIES.md](ENTITIES.md) (catalogue complet, au-delà de la V1) et
-[RELATIONS.md](RELATIONS.md).
+Catalogue complet des entités et leurs relations : [ENTITIES.md](ENTITIES.md)
+et [RELATIONS.md](RELATIONS.md).
 
 ## Synchronisation entre installations
 
-Conception détaillée (implémentation prévue en V10) : voir
+Conception et algorithme de fusion implémenté : voir
 [SYNCHRONIZATION.md](SYNCHRONIZATION.md).
+
+## Limites connues
+
+Assumées consciemment pour tenir l'ensemble V1-V11 dans une base de code
+cohérente ; à réévaluer si l'usage réel le justifie.
+
+- **Pas de suite de tests automatisés committée.** Chaque version a été
+  vérifiée par des scripts Playwright ad hoc pendant le développement
+  (créer des enregistrements réels, vérifier l'absence d'erreur console,
+  et pour la synchronisation, deux installations simulées échangeant de
+  vrais fichiers) — cette méthode a trouvé de vrais bugs (fuseau horaire
+  en V3, `event.currentTarget` et l'algorithme de fusion en V10) que la
+  seule relecture de code n'aurait probablement pas révélés. Mais ces
+  scripts n'ont pas été conservés dans le dépôt comme suite régressive :
+  toute évolution future devrait s'appuyer sur un test manuel similaire,
+  ou en constituer une suite durable si le projet grandit.
+- **Accessibilité de base, pas auditée formellement.** Labels de
+  formulaire associés, `aria-required`/`aria-describedby`/`aria-invalid`
+  sur les champs, dialogues natifs `<dialog>` (focus géré par le
+  navigateur), focus visible (`:focus-visible`). Pas de test au lecteur
+  d'écran, pas d'audit WCAG.
+- **Performance non profilée.** Les listes utilisent `Array.filter` en
+  mémoire plutôt que des requêtes Dexie indexées pour la plupart des
+  filtres (ex. tâches en retard, demandes ouvertes) : largement suffisant
+  pour les volumes d'une paroisse, mais à revisiter si une table dépasse
+  plusieurs dizaines de milliers de lignes.
+- **Calendrier liturgique approché** (voir `js/services/liturgy.js`) :
+  Épiphanie fixée au 6 janvier plutôt que reportée au dimanche selon les
+  usages locaux — à corriger via les particularités diocésaines si besoin.
+- **Synchronisation par fichier, pas par réseau** : choix assumé (voir
+  [SYNCHRONIZATION.md](SYNCHRONIZATION.md)), pas une limitation à lever.

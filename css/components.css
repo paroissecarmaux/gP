@@ -368,3 +368,154 @@ dialog.modal::backdrop {
   outline: 2px solid var(--color-primary);
   outline-offset: 2px;
 }
+
+.form-field-current {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  margin: 0.25rem 0;
+}
+
+/* ---------- Tableau de bord / KPI ---------- */
+.kpi-section {
+  margin-top: 1.75rem;
+}
+
+.kpi-section h2 {
+  font-size: 1rem;
+  color: var(--color-text-muted);
+  margin-bottom: 0.6rem;
+}
+
+.dashboard-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.75rem;
+}
+
+.dashboard-tile {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 0.85rem;
+  text-decoration: none;
+  color: var(--color-text);
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  background: var(--color-bg-subtle);
+}
+
+.dashboard-tile-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.dashboard-tile-label {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+
+.dashboard-sectors {
+  max-width: 480px;
+}
+
+/* ---------- Statistiques ---------- */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.5rem;
+}
+
+/* ---------- Certificat ---------- */
+.certificate-paper {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 2rem;
+  max-width: 640px;
+  line-height: 1.6;
+}
+
+.certificate-date {
+  margin-top: 2rem;
+  font-style: italic;
+}
+
+.certificate-actions {
+  margin-top: 1rem;
+}
+
+/* ---------- Recherche ---------- */
+.search-form {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  max-width: 480px;
+}
+
+.search-form input {
+  flex: 1;
+  font: inherit;
+  padding: 0.4rem 0.6rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--color-border);
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+.search-section {
+  margin-bottom: 1.25rem;
+}
+
+/* ---------- Synchronisation ---------- */
+.sync-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+  margin: 1rem 0;
+}
+
+.import-label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.85rem;
+}
+
+.sync-feedback {
+  background: var(--color-bg-subtle);
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius);
+}
+
+/* ---------- Conflits ---------- */
+.conflict-card {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.conflict-diff td {
+  background: var(--color-danger-bg);
+}
+
+.conflict-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 0.75rem;
+}
+
+/* ---------- Corbeille ---------- */
+.trash-section {
+  margin-bottom: 2rem;
+}
+
+/* ---------- Impression ---------- */
+@media print {
+  .no-print,
+  .app-header,
+  .app-nav {
+    display: none !important;
+  }
+}

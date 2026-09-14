@@ -11,4 +11,8 @@
   const lieuRepository = new gP.db.Repository('lieux', 'Lieu');
 
   Object.assign(gP.services, { sectorRepository, clocherRepository, lieuRepository });
+
+  gP.db.registerEntity({ key: 'sectors', label: 'Secteur', repository: sectorRepository, searchFields: ['name'], path: '/territoire/secteurs' });
+  gP.db.registerEntity({ key: 'clochers', label: 'Clocher', repository: clocherRepository, searchFields: ['name'], path: '/territoire/clochers' });
+  gP.db.registerEntity({ key: 'lieux', label: 'Lieu', repository: lieuRepository, searchFields: ['name', 'address'], path: '/territoire/lieux' });
 })(window.gP);

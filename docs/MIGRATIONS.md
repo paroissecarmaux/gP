@@ -35,6 +35,14 @@ question d'intégrité des données (priorité n°1 du projet), pas de style.
 | 1 | `installations`, `localSettings` | — (version initiale) |
 | 2 | `persons`, `families`, `familyMembers`, `coordonnees`, `functions`, `personFunctions`, `groups`, `groupMemberships`, `volunteers`, `clergy`, `employees` | — (nouvelles tables uniquement) |
 | 3 | `sectors`, `clochers`, `lieux`, `evenements`, `celebrations`, `participations` | — (nouvelles tables uniquement) |
+| 4 | `tasks`, `taskAssignments` | — (nouvelles tables uniquement) |
+| 5 | `intentions`, `payments` | — (nouvelles tables uniquement) |
+| 6 | `secretariatRequests` | — (nouvelles tables uniquement) |
+| 7 | `sacramentalRegisters`, `sacramentalActs`, `sacramentalNotes`, `certificates` | — (nouvelles tables uniquement) |
+| 8 | `collections`, `collectionCounts`, `collectionRemittances` | — (nouvelles tables uniquement) |
+| 9 | `suppliers`, `documents`, `history` | — (nouvelles tables uniquement) |
+| 10 | `syncLog`, `syncConflicts` | — (nouvelles tables uniquement) |
+| 11 | `diocesanFeasts` | — (nouvelles tables uniquement) |
 
-Les versions suivantes seront ajoutées au fil de la [roadmap](ROADMAP.md),
-une entrée par module livré (V2 → Annuaire, V3 → Territoire/Agenda…).
+Toutes les versions du cahier des charges (V1 à V11) sont livrées. La
+prochaine entrée serait la version 12, pour toute évolution future.

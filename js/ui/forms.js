@@ -60,6 +60,16 @@
       } else {
         input.value = value ?? '';
       }
+    } else if (field.type === 'file') {
+      input = document.createElement('input');
+      input.type = 'file';
+      if (field.accept) input.accept = field.accept;
+      if (value?.name) {
+        const current = document.createElement('p');
+        current.className = 'form-field-current';
+        current.textContent = `Fichier actuel : ${value.name}`;
+        wrapper.appendChild(current);
+      }
     } else {
       input = document.createElement('input');
       input.type =
@@ -89,6 +99,7 @@
     const input = form.elements.namedItem(field.name);
 
     if (field.type === 'checkbox') return input.checked;
+    if (field.type === 'file') return input.files.length > 0 ? input.files[0] : undefined;
     if (field.type === 'multiselect') return Array.from(input.selectedOptions).map((o) => o.value);
     if (field.type === 'number') return input.value === '' ? null : Number(input.value);
     if (field.type === 'date' || field.type === 'datetime') return input.value === '' ? null : new Date(input.value);
@@ -99,7 +110,12 @@
 
   function readFormValues(fields, form) {
     const values = {};
-    for (const field of fields) values[field.name] = readFieldValue(field, form);
+    for (const field of fields) {
+      const value = readFieldValue(field, form);
+      // `undefined` = champ fichier non modifié (édition) : on ne l'inclut
+      // pas, pour ne pas écraser le fichier existant avec `undefined`.
+      if (value !== undefined) values[field.name] = value;
+    }
     return values;
   }
 

@@ -15,4 +15,6 @@
   }
 
   Object.assign(gP.services, { coordonneeRepository, listForOwner, addCoordonnee });
+
+  gP.db.registerEntity({ key: 'coordonnees', label: 'Coordonnée', repository: coordonneeRepository });
 })(window.gP);

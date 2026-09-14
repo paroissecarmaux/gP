@@ -60,4 +60,12 @@
     setProfile,
     findPotentialDuplicates,
   });
+
+  gP.db.registerEntity({
+    key: 'persons',
+    label: 'Personne',
+    repository: personRepository,
+    searchFields: ['firstName', 'lastName', 'notes'],
+    path: '/annuaire/personnes',
+  });
 })(window.gP);

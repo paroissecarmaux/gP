@@ -24,4 +24,6 @@
     assignFunction,
     endFunctionAssignment,
   });
+
+  gP.db.registerEntity({ key: 'functions', label: 'Fonction', repository: functionRepository, searchFields: ['name'], path: '/annuaire/fonctions' });
 })(window.gP);

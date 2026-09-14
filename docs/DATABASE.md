@@ -91,4 +91,73 @@ au-delà de la V1.
 | `celebrations` | `id, updatedAt, deletedAt, startAt, lieuId, celebrantPersonId, type` | Célébration liturgique |
 | `participations` | `id, updatedAt, deletedAt, subjectType, subjectId, personId` | Participant à un événement/une célébration (lien polymorphe) |
 
-Détail des champs : [ENTITIES.md](ENTITIES.md).
+### v4 — Tâches
+
+| Table | Index Dexie | Contenu |
+|-------|-------------|---------|
+| `tasks` | `id, updatedAt, deletedAt, status, priority, dueDate` | Tâche |
+| `taskAssignments` | `id, updatedAt, deletedAt, taskId, personId, groupId` | Affectation (une personne OU un groupe par ligne) |
+
+### v5 — Intentions de messe & Paiements
+
+| Table | Index Dexie | Contenu |
+|-------|-------------|---------|
+| `intentions` | `id, updatedAt, deletedAt, status, celebrationId` | Intention de messe |
+| `payments` | `id, updatedAt, deletedAt, intentionId, date` | Paiement (historique append-only) |
+
+### v6 — Secrétariat
+
+| Table | Index Dexie | Contenu |
+|-------|-------------|---------|
+| `secretariatRequests` | `id, updatedAt, deletedAt, status, priority, dueDate` | Demande secrétariat |
+
+### v7 — Sacrements & Certificats
+
+| Table | Index Dexie | Contenu |
+|-------|-------------|---------|
+| `sacramentalRegisters` | `id, updatedAt, deletedAt, type, clocherId` | Registre sacramentel |
+| `sacramentalActs` | `id, updatedAt, deletedAt, registerId, type, personId, date` | Acte sacramentel, numéroté dans son registre |
+| `sacramentalNotes` | `id, updatedAt, deletedAt, actId` | Mention marginale sur un acte |
+| `certificates` | `id, updatedAt, deletedAt, actId` | Journal des certificats générés/imprimés |
+
+### v8 — Quêtes
+
+| Table | Index Dexie | Contenu |
+|-------|-------------|---------|
+| `collections` | `id, updatedAt, deletedAt, celebrationId, date` | Collecte |
+| `collectionCounts` | `id, updatedAt, deletedAt, collectionId` | Comptage (bénévoles, espèces, chèques) |
+| `collectionRemittances` | `id, updatedAt, deletedAt, collectionId, date` | Remise en banque |
+
+### v9 — Fournisseurs, Documents, Historique
+
+| Table | Index Dexie | Contenu |
+|-------|-------------|---------|
+| `suppliers` | `id, updatedAt, deletedAt, name` | Fournisseur |
+| `documents` | `id, updatedAt, deletedAt, linkedEntityType, linkedEntityId` | Document (fichier + référence polymorphe) |
+| `history` | `id, entityType, entityId, occurredAt` | Journal d'audit transversal (pas de `deletedAt` : un historique ne se supprime jamais) |
+
+La Corbeille n'a pas de table dédiée : elle liste, via `js/db/registry.js`,
+tout enregistrement de toute entité enregistrée dont `deletedAt` est
+renseigné.
+
+### v10 — Recherche, Sauvegarde, Synchronisation, KPI
+
+| Table | Index Dexie | Contenu |
+|-------|-------------|---------|
+| `syncLog` | `id, updatedAt, deletedAt, occurredAt` | Journal des exports/imports |
+| `syncConflicts` | `id, updatedAt, deletedAt, entityType, entityId, resolvedAt` | Conflit de synchronisation non résolu |
+
+La Recherche globale et le tableau de bord ne créent pas de table : ils
+lisent les tables existantes via `js/db/registry.js` et les repositories
+des autres modules.
+
+### v11 — Calendrier liturgique
+
+| Table | Index Dexie | Contenu |
+|-------|-------------|---------|
+| `diocesanFeasts` | `id, updatedAt, deletedAt, month, day` | Particularité diocésaine (récurrente chaque année) |
+
+Les fêtes fixes et mobiles du calendrier romain sont calculées à la volée
+(`js/services/liturgy.js`), pas stockées.
+
+Détail des champs de chaque entité : [ENTITIES.md](ENTITIES.md).

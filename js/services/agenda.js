@@ -38,4 +38,7 @@
     removeParticipant,
     mergeAgendaItems,
   });
+
+  gP.db.registerEntity({ key: 'evenements', label: 'Événement', repository: evenementRepository, searchFields: ['title', 'description'], path: '/agenda/evenements' });
+  gP.db.registerEntity({ key: 'participations', label: 'Participation', repository: participationRepository });
 })(window.gP);

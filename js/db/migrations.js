@@ -6,7 +6,7 @@
   'use strict';
 
   const UPGRADES = {
-    // 4: (tx) => { ... }
+    // 12: (tx) => { ... }
   };
 
   function applyMigrations(db) {

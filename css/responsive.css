@@ -1,3 +1,11 @@
+/* Un tableau large (beaucoup de colonnes) peut dépasser sur petit écran :
+ * on le fait défiler horizontalement via son conteneur plutôt que de
+ * changer son `display` (qui casserait l'alignement thead/tbody) ou de
+ * laisser la page entière déborder. */
+.app-outlet {
+  overflow-x: auto;
+}
+
 @media (max-width: 640px) {
   .app-header {
     flex-wrap: wrap;
@@ -17,5 +25,34 @@
     left: 1rem;
     right: 1rem;
     max-width: none;
+  }
+
+  .agenda-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .agenda-nav,
+  .agenda-views,
+  .agenda-filters {
+    justify-content: center;
+  }
+
+  .agenda-month-grid {
+    font-size: 0.7rem;
+  }
+
+  .agenda-day-cell {
+    min-height: 64px;
+    padding: 0.2rem;
+  }
+
+  .dashboard-tiles {
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  }
+
+  dialog.modal {
+    max-width: none;
+    width: calc(100vw - 2rem);
   }
 }

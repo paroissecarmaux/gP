@@ -4,6 +4,11 @@
 // architecturales) : avec dix tables ajoutées d'un coup pour l'annuaire,
 // dupliquer cette logique dans chaque service violerait la règle
 // « éviter toute duplication inutile » (section 3 du cahier des charges).
+//
+// Depuis V9, chaque mutation journalise automatiquement une entrée dans
+// l'historique transversal (js/services/history.js) : c'est ce qui rend
+// l'historique et la Corbeille valables pour TOUTE entité passée par ici,
+// sans code répété dans chaque service.
 (function (gP) {
   'use strict';
 
@@ -14,6 +19,13 @@
       if (error instanceof gP.utils.DatabaseError) throw error;
       throw new gP.utils.DatabaseError(message, { cause: error });
     }
+  }
+
+  function recordHistory(entityType, entityId, action) {
+    // Optionnel tant que js/services/history.js n'est pas chargé (aucune
+    // version antérieure à V9 n'en a besoin) ; toujours présent une fois
+    // l'application complète chargée.
+    return gP.services.recordHistory?.(entityType, entityId, action);
   }
 
   class Repository {
@@ -41,6 +53,7 @@
       return withDatabaseError(async () => {
         const entity = gP.utils.createEntity(fields, gP.services.getCurrentInstallationId());
         await this.table.put(entity);
+        await recordHistory(this.entityLabel, entity.id, 'create');
         return entity;
       }, `Impossible de créer : ${this.entityLabel}`);
     }
@@ -51,6 +64,7 @@
         if (!existing) throw new gP.utils.DatabaseError(`${this.entityLabel} ${id} introuvable`);
         const updated = gP.utils.touch({ ...existing, ...fields });
         await this.table.put(updated);
+        await recordHistory(this.entityLabel, id, 'update');
         return updated;
       }, `Impossible de modifier : ${this.entityLabel}`);
     }
@@ -62,6 +76,7 @@
         if (!existing) throw new gP.utils.DatabaseError(`${this.entityLabel} ${id} introuvable`);
         const deleted = gP.utils.softDelete(existing);
         await this.table.put(deleted);
+        await recordHistory(this.entityLabel, id, 'delete');
         return deleted;
       }, `Impossible de supprimer : ${this.entityLabel}`);
     }
@@ -72,8 +87,18 @@
         if (!existing) throw new gP.utils.DatabaseError(`${this.entityLabel} ${id} introuvable`);
         const restored = gP.utils.touch({ ...existing, deletedAt: null });
         await this.table.put(restored);
+        await recordHistory(this.entityLabel, id, 'restore');
         return restored;
       }, `Impossible de restaurer : ${this.entityLabel}`);
+    }
+
+    /** Suppression définitive (Corbeille, V9 uniquement) : à utiliser avec
+     * prudence, jamais comme suppression par défaut. */
+    async hardDelete(id) {
+      return withDatabaseError(async () => {
+        await this.table.delete(id);
+        await recordHistory(this.entityLabel, id, 'purge');
+      }, `Impossible de purger définitivement : ${this.entityLabel}`);
     }
 
     async listWhere(predicate, options) {

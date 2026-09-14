@@ -30,4 +30,6 @@
     familiesAddMember: addMember,
     familiesRemoveMember: removeMember,
   });
+
+  gP.db.registerEntity({ key: 'families', label: 'Famille', repository: familyRepository, searchFields: ['name'], path: '/annuaire/familles' });
 })(window.gP);

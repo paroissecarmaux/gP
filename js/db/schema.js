@@ -48,6 +48,68 @@
       // Liaison polymorphe (subjectType: 'evenement' | 'celebration').
       participations: 'id, updatedAt, deletedAt, subjectType, subjectId, personId',
     },
+    4: {
+      // Tâches (voir docs/ENTITIES.md § V4).
+      tasks: 'id, updatedAt, deletedAt, status, priority, dueDate',
+      // Affectation à UNE personne OU UN groupe par ligne (jamais les deux) :
+      // une tâche affectée à plusieurs personnes/groupes a plusieurs lignes.
+      taskAssignments: 'id, updatedAt, deletedAt, taskId, personId, groupId',
+    },
+    5: {
+      // Intentions de messe & paiements (voir docs/ENTITIES.md § V5).
+      intentions: 'id, updatedAt, deletedAt, status, celebrationId',
+      // Historique append-only par nature : jamais modifié, seulement
+      // ajouté ou supprimé-doucement (jamais de suppression silencieuse).
+      payments: 'id, updatedAt, deletedAt, intentionId, date',
+    },
+    6: {
+      // Secrétariat (voir docs/ENTITIES.md § V6).
+      secretariatRequests: 'id, updatedAt, deletedAt, status, priority, dueDate',
+    },
+    7: {
+      // Sacrements & certificats (voir docs/ENTITIES.md § V7). De vrais
+      // registres : les actes s'y rattachent et y sont numérotés, jamais de
+      // simple booléen sur Personne.
+      sacramentalRegisters: 'id, updatedAt, deletedAt, type, clocherId',
+      sacramentalActs: 'id, updatedAt, deletedAt, registerId, type, personId, date',
+      sacramentalNotes: 'id, updatedAt, deletedAt, actId',
+      // Journal des certificats générés/imprimés — jamais de re-saisie.
+      certificates: 'id, updatedAt, deletedAt, actId',
+    },
+    8: {
+      // Quêtes (voir docs/ENTITIES.md § V8).
+      collections: 'id, updatedAt, deletedAt, celebrationId, date',
+      collectionCounts: 'id, updatedAt, deletedAt, collectionId',
+      collectionRemittances: 'id, updatedAt, deletedAt, collectionId, date',
+    },
+    9: {
+      // Fournisseurs, Documents, Historique (voir docs/ENTITIES.md § V9).
+      suppliers: 'id, updatedAt, deletedAt, name',
+      // Référence polymorphe réelle (linkedEntityType/Id), pas une
+      // description libre : on doit pouvoir répondre à « quels documents
+      // pour telle fiche ? » sans ambiguïté.
+      documents: 'id, updatedAt, deletedAt, linkedEntityType, linkedEntityId',
+      // Journal d'audit transversal, alimenté automatiquement par
+      // js/db/repository.js à partir de cette version — voir
+      // docs/ARCHITECTURE.md. Pas de deletedAt : un historique ne se
+      // supprime jamais.
+      history: 'id, entityType, entityId, occurredAt',
+      // Corbeille : pas de table dédiée, vue calculée sur les entités
+      // enregistrées via js/db/registry.js dont deletedAt est renseigné.
+    },
+    10: {
+      // Synchronisation (voir docs/ENTITIES.md § V10 et SYNCHRONIZATION.md).
+      syncLog: 'id, updatedAt, deletedAt, occurredAt',
+      // Un conflit non résolu doit rester identifié : entité à part
+      // entière, pas une alerte éphémère.
+      syncConflicts: 'id, updatedAt, deletedAt, entityType, entityId, resolvedAt',
+    },
+    11: {
+      // Calendrier liturgique (voir docs/ENTITIES.md § V11). Les fêtes
+      // fixes/mobiles du calendrier romain sont calculées, pas stockées :
+      // seules les particularités diocésaines le sont.
+      diocesanFeasts: 'id, updatedAt, deletedAt, month, day',
+    },
   };
 
   gP.db.SCHEMA = SCHEMA;
