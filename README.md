@@ -1,20 +1,13 @@
 # gParoisse
 
-Application locale de gestion paroissiale — Carmaux / Valence. 100 %
-locale : HTML, CSS, JavaScript vanilla, IndexedDB via Dexie.js. Sans
-backend, sans serveur distant, sans cloud.
+Application locale de gestion paroissiale — Carmaux / Valence. Site 100 %
+statique : HTML, CSS, JavaScript vanilla, IndexedDB via Dexie.js. Sans
+backend, sans serveur, sans build, sans dépendance — aucune installation
+requise.
 
 ## Lancer l'application
 
-Sur Windows : double-cliquer sur `demarrer-gParoisse.bat` (Node.js requis,
-voir [INSTALLATION.md](INSTALLATION.md)).
-
-En ligne de commande, sur n'importe quel système avec Node.js installé :
-```
-node serve.js
-```
-puis ouvrir http://localhost:5500 si le navigateur ne s'ouvre pas
-automatiquement.
+Double-cliquer sur `index.html`. C'est tout.
 
 ## Documentation
 

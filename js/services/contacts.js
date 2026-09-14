@@ -1,14 +1,18 @@
 // Coordonnées / adresses, entité indépendante à propriétaire polymorphe
 // (« personne » ou « famille ») — voir docs/ENTITIES.md.
-import { Repository } from '../db/repository.js';
+(function (gP) {
+  'use strict';
 
-export const coordonneeRepository = new Repository('coordonnees', 'Coordonnée');
+  const coordonneeRepository = new gP.db.Repository('coordonnees', 'Coordonnée');
 
-export async function listForOwner(ownerType, ownerId) {
-  const all = await coordonneeRepository.list();
-  return all.filter((row) => row.ownerType === ownerType && row.ownerId === ownerId);
-}
+  async function listForOwner(ownerType, ownerId) {
+    const all = await coordonneeRepository.list();
+    return all.filter((row) => row.ownerType === ownerType && row.ownerId === ownerId);
+  }
 
-export async function addCoordonnee(ownerType, ownerId, fields) {
-  return coordonneeRepository.create({ ownerType, ownerId, isPrimary: false, ...fields });
-}
+  async function addCoordonnee(ownerType, ownerId, fields) {
+    return coordonneeRepository.create({ ownerType, ownerId, isPrimary: false, ...fields });
+  }
+
+  Object.assign(gP.services, { coordonneeRepository, listForOwner, addCoordonnee });
+})(window.gP);

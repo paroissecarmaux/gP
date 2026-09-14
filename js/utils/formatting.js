@@ -1,13 +1,19 @@
-export function personLabel(person) {
-  if (!person) return '';
-  return [person.civility, person.firstName, person.lastName].filter(Boolean).join(' ');
-}
+(function (gP) {
+  'use strict';
 
-export function formatAmount(value) {
-  if (value == null) return '';
-  return `${Number(value).toFixed(2)} €`;
-}
+  function personLabel(person) {
+    if (!person) return '';
+    return [person.civility, person.firstName, person.lastName].filter(Boolean).join(' ');
+  }
 
-export function shortId(id) {
-  return id ? id.slice(0, 8) : '';
-}
+  function formatAmount(value) {
+    if (value == null) return '';
+    return `${Number(value).toFixed(2)} €`;
+  }
+
+  function shortId(id) {
+    return id ? id.slice(0, 8) : '';
+  }
+
+  Object.assign(gP.utils, { personLabel, formatAmount, shortId });
+})(window.gP);

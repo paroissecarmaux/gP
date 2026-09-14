@@ -1,15 +1,19 @@
-import Dexie from '../vendor/dexie.mjs';
-import { applyMigrations } from './migrations.js';
-import { DatabaseError } from '../utils/errors.js';
+// `Dexie` est un global fourni par js/vendor/dexie.js (chargé en script
+// classique avant ce fichier — voir index.html).
+(function (gP) {
+  'use strict';
 
-export const db = new Dexie('gParoisse');
-applyMigrations(db);
+  const db = new Dexie('gParoisse');
+  gP.db.applyMigrations(db);
 
-export async function openDatabase() {
-  try {
-    await db.open();
-    return db;
-  } catch (error) {
-    throw new DatabaseError("Impossible d'ouvrir la base de données locale", { cause: error });
+  async function openDatabase() {
+    try {
+      await db.open();
+      return db;
+    } catch (error) {
+      throw new gP.utils.DatabaseError("Impossible d'ouvrir la base de données locale", { cause: error });
+    }
   }
-}
+
+  Object.assign(gP.db, { db, openDatabase });
+})(window.gP);

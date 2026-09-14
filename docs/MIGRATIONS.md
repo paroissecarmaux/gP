@@ -34,6 +34,7 @@ question d'intégrité des données (priorité n°1 du projet), pas de style.
 |---------|---------|-----------------------|
 | 1 | `installations`, `localSettings` | — (version initiale) |
 | 2 | `persons`, `families`, `familyMembers`, `coordonnees`, `functions`, `personFunctions`, `groups`, `groupMemberships`, `volunteers`, `clergy`, `employees` | — (nouvelles tables uniquement) |
+| 3 | `sectors`, `clochers`, `lieux`, `evenements`, `celebrations`, `participations` | — (nouvelles tables uniquement) |
 
 Les versions suivantes seront ajoutées au fil de la [roadmap](ROADMAP.md),
 une entrée par module livré (V2 → Annuaire, V3 → Territoire/Agenda…).

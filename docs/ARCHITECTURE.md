@@ -1,7 +1,9 @@
 # Architecture — gParoisse
 
-Application 100 % locale : HTML, CSS et JavaScript vanilla, IndexedDB via
-Dexie.js. Pas de backend, pas de build, pas de framework SPA — voir
+Application 100 % locale et 100 % statique : HTML, CSS et JavaScript
+vanilla, IndexedDB via Dexie.js. Pas de backend, pas de build, pas de
+framework SPA, **pas de serveur du tout** — `index.html` s'ouvre en
+double-clic (`file://`), sans rien installer, pas même Node.js. Voir
 « Décisions architecturales » ci-dessous pour la justification de chaque
 choix qui s'écarte d'une lecture strictement littérale du cahier des
 charges.
@@ -10,10 +12,8 @@ charges.
 
 ```
 /
-├── index.html            Point d'entrée, charge js/app.js en module
+├── index.html            Point d'entrée. Double-clic pour lancer l'app.
 ├── favicon.svg
-├── serve.js               Serveur de fichiers statiques local (voir plus bas)
-├── demarrer-gParoisse.bat  Lanceur Windows (double-clic)
 ├── css/
 │   ├── app.css             Réinitialisation, mise en page, structure
 │   ├── components.css       Styles des composants (cartes, notifications…)
@@ -21,7 +21,7 @@ charges.
 ├── js/
 │   ├── app.js               Bootstrap : DB, installation, routeur, coquille
 │   ├── vendor/
-│   │   └── dexie.mjs         Dexie 4.4.6, copie locale (voir plus bas)
+│   │   └── dexie.js          Dexie 4.4.6, build UMD, copie locale (voir plus bas)
 │   ├── db/
 │   │   ├── database.js       Instance Dexie + ouverture
 │   │   ├── schema.js          Définition des tables, une entrée par version
@@ -33,7 +33,10 @@ charges.
 │   │   ├── families.js         Famille + membres
 │   │   ├── functions.js         Fonction + affectations
 │   │   ├── groups.js             Groupe + participations
-│   │   └── contacts.js            Coordonnée (partagée Personne/Famille)
+│   │   ├── contacts.js            Coordonnée (partagée Personne/Famille)
+│   │   ├── territory.js            Secteur + Clocher + Lieu
+│   │   ├── agenda.js                Événement + Participation (polymorphe)
+│   │   └── celebrations.js           Célébration + récurrence + conflits
 │   ├── ui/
 │   │   ├── components.js       Component, AppShell, ListView, FormView
 │   │   ├── router.js            Routeur hash avec paramètres
@@ -53,7 +56,11 @@ charges.
 │   ├── people.js            Liste + fiche riche (coordonnées, fonctions, profils)
 │   ├── families.js           Liste + fiche riche (membres)
 │   ├── groups.js              Liste + fiche riche (membres)
-│   └── functions.js            Liste + formulaire (CRUD simple)
+│   ├── functions.js            Liste + formulaire (CRUD simple)
+│   ├── territory.js             Secteurs/Clochers/Lieux (CRUD simple)
+│   ├── agenda.js                  Vue calendrier Jour/Semaine/Mois + filtres
+│   ├── evenements.js               Liste + fiche (participants)
+│   └── celebrations.js              Liste + fiche (récurrence, conflits, participants)
 ├── docs/                   Cette documentation
 └── scripts/
     └── push-to-github.ps1
@@ -79,45 +86,55 @@ mieux « un fichier par domaine métier ».
 
 ## Décisions architecturales
 
-### Modules ES natifs, sans bundler
+### Scripts classiques + espace de noms global, zéro serveur — décision révisée
 
-Le code est écrit en modules ES standard (`import`/`export`), chargés tels
-quels par le navigateur (`<script type="module">`), sans étape de
-build (Vite, Webpack, esbuild…). C'est la lecture la plus littérale de
-« JavaScript vanilla » et de la structure de dossiers demandée (un
-`index.html` à la racine chargeant directement des fichiers `.js`, sans
-`src/`, `dist/`, `package.json` applicatif).
+**Version initiale de la V1** : le code utilisait les modules ES natifs
+(`import`/`export`, `<script type="module">`), et un petit serveur de
+fichiers local (`serve.js`, Node sans dépendance) était fourni pour
+contourner deux limites : les modules ES sont bloqués par la politique
+CORS des navigateurs en `file://`, et le comportement d'IndexedDB en
+`file://` avait *a priori* semblé risqué à valider sans test — jugement
+prudent mais pas vérifié, sur un point pourtant central vu que
+l'intégrité des données est la priorité n°1 du projet.
 
-### Un serveur de fichiers statique local, pas de `file://`
+**Retour explicite de l'utilisateur** : aucun outil, aucun serveur, même
+local et sans dépendance — un site strictement statique, ouvert en
+double-clic sur `index.html`. Deux changements en conséquence :
 
-Ouvrir `index.html` directement (`file://`) est théoriquement possible,
-mais deux problèmes réels s'y opposent :
-1. Les modules ES sont bloqués par la politique CORS des navigateurs sur
-   `file://` (origine `null`).
-2. Le comportement d'IndexedDB sur `file://` est incohérent selon les
-   navigateurs et leurs versions — inacceptable pour une application dont
-   la **priorité n°1 est l'intégrité des données** (section 10 du cahier
-   des charges).
+1. **Tous les modules ES ont été convertis en scripts classiques.** Plus
+   d'`import`/`export` : chaque fichier s'enregistre dans un espace de
+   noms global unique, `window.gP` (`{ utils, db, services, ui, pages }`),
+   initialisé une fois en tête d'`index.html` puis rempli par chaque
+   `<script>` chargé dans l'ordre de ses dépendances (utils → db →
+   services → ui → pages → `app.js`). Un fichier lit les dépendances
+   d'un autre bucket directement (`gP.services.personRepository`) plutôt
+   que par un `import` — la seule contrainte est l'ordre de chargement
+   des `<script>`, documenté et fixe dans `index.html`.
+2. **`serve.js` et le lanceur Windows ont été supprimés.** Avant de les
+   retirer, le comportement d'IndexedDB en `file://` a été vérifié
+   directement (ouverture de base, écriture, fermeture, réouverture,
+   lecture — cycle complet, avec Chromium) plutôt que supposé risqué :
+   il fonctionne correctement. Le risque théorique initial ne se
+   confirmait pas en pratique pour cet usage (un seul fichier, un seul
+   profil navigateur, pas de scénario multi-origine) ; il n'y avait donc
+   plus de raison de maintenir un serveur pour s'en prémunir.
 
-`serve.js` (racine du projet) est donc un serveur de fichiers statiques
-minimal, écrit sans aucune dépendance (uniquement les modules natifs de
-Node `http`/`fs`/`path`) : il ne contient **aucune logique métier**, ne
-touche jamais à la base de données, et ne fait rien de plus que
-`python -m http.server`. Ce n'est pas un « backend » au sens exclu par le
-cahier des charges (qui vise un serveur métier/API gérant des données) :
-c'est un outil local, au même titre qu'un serveur de développement. Node
-est requis sur le poste pour le lancer, mais **aucune dépendance n'est
-installée** (pas de `npm install`, pas de `node_modules`, pas de
-`package.json`) — juste `node serve.js`, via le double-clic sur
-`demarrer-gParoisse.bat`.
+Pas de collision de noms entre fichiers d'un même bucket à surveiller :
+chaque export (dépôt, fonction, classe) porte un nom unique dans tout le
+projet — vérifié explicitement lors de la conversion (deux paires de noms
+génériques, `listMembersOf`/`addMember`/`removeMember` dans
+`families.js` et `groups.js`, ont dû être préfixées, `familiesXxx` /
+`groupsXxx`, pour éviter que l'un écrase l'autre).
 
 ### Dexie.js vendue en local
 
-`js/vendor/dexie.mjs` est une copie locale de Dexie 4.4.6 (build ESM
-« modern », navigateurs récents), et non un `<script>` pointant vers un
-CDN. Cohérent avec « 100 % locale » et « utilisable hors connexion » dès
-le premier lancement, sans dépendre d'une disponibilité réseau — y
-compris pour charger une simple bibliothèque JS.
+`js/vendor/dexie.js` est une copie locale du build **UMD** de Dexie 4.4.6
+(et non le build ESM d'origine, incompatible avec les scripts classiques) :
+chargé en `<script src="js/vendor/dexie.js">`, il expose `Dexie` comme
+variable globale, utilisée par `js/db/database.js`. Cohérent avec « 100 %
+locale » et « utilisable hors connexion » dès le premier lancement, sans
+dépendre d'une disponibilité réseau — y compris pour charger une simple
+bibliothèque JS.
 
 ### Couche « Repository » générique — décision révisée en V2
 
@@ -145,6 +162,36 @@ mêmes briques bas niveau (`js/ui/forms.js` : construction/lecture de
 champs, `js/ui/modals.js` : confirmation) plutôt que de forcer ce cas
 dans `ListView`/`FormView` — une page riche par entité complexe reste
 plus lisible qu'une abstraction générique essayant de tout couvrir.
+
+### Conflits d'agenda et récurrence — calculés, jamais stockés
+
+`js/services/celebrations.js` calcule les conflits (même lieu ou même
+célébrant, horaire chevauchant) à la volée à partir des célébrations
+existantes, et ne les persiste nulle part : un conflit est un état dérivé
+qui change dès qu'une célébration bouge, le stocker créerait une source de
+vérité à resynchroniser en permanence. Une célébration récurrente
+(hebdomadaire/mensuelle) génère immédiatement une occurrence par date
+(section 3 : « pas de données fictives ») — chacune est un enregistrement
+indépendant, modifiable ou supprimable seule, plutôt qu'une règle de
+récurrence interprétée à l'affichage : plus simple, et cohérent avec la
+suppression douce (annuler UNE occurrence a un sens ; annuler une portion
+d'une règle abstraite, beaucoup moins).
+
+### Piège de fuseau horaire dans le regroupement par jour
+
+Détecté par les tests de bout en bout pendant le développement de la V3,
+corrigé avant livraison : la grille de l'agenda (`pages/agenda.js`)
+construit ses cellules en heure **locale** (`Date.setDate`/`getDate`),
+mais la fonction de regroupement des événements par jour utilisait
+`toISOString()` (heure **UTC**) pour produire la même clé. Pour tout
+fuseau horaire différent d'UTC, minuit local ne tombe pas sur le même jour
+calendaire en UTC (ex. minuit le 21/09 en UTC+2 = 22h le 20/09 en UTC) :
+les événements apparaissaient donc décalés d'un jour. Correction :
+`dateKey()` construit désormais sa clé à partir des mêmes méthodes
+locales que la grille (`getFullYear`/`getMonth`/`getDate`), jamais de
+`toISOString()` pour un regroupement calendaire. Point de vigilance à
+garder pour toute future fonctionnalité manipulant des dates par « jour »
+plutôt que par instant précis.
 
 ## Composants et navigation
 

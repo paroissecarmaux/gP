@@ -1,7 +1,7 @@
 # Base de données — gParoisse
 
 Stockage local via [Dexie.js](https://dexie.org/) (vendue en local dans
-`js/vendor/dexie.mjs`, version 4.4.6) au-dessus d'IndexedDB. Base nommée
+`js/vendor/dexie.js`, version 4.4.6) au-dessus d'IndexedDB. Base nommée
 `gParoisse`, ouverte par `openDatabase()` (`js/db/database.js`).
 
 ## Métadonnées communes à toute entité métier importante
@@ -79,5 +79,16 @@ au-delà de la V1.
 | `volunteers` | `id, updatedAt, deletedAt, &personId` | Profil bénévole (1-1, index unique) |
 | `clergy` | `id, updatedAt, deletedAt, &personId` | Profil clergé (1-1, index unique) |
 | `employees` | `id, updatedAt, deletedAt, &personId` | Profil salarié (1-1, index unique) |
+
+### v3 — Territoire, Agenda, Célébrations
+
+| Table | Index Dexie | Contenu |
+|-------|-------------|---------|
+| `sectors` | `id, updatedAt, deletedAt, name` | Secteur |
+| `clochers` | `id, updatedAt, deletedAt, name, sectorId` | Clocher |
+| `lieux` | `id, updatedAt, deletedAt, name, clocherId, sectorId` | Lieu (rattaché à un clocher OU un secteur) |
+| `evenements` | `id, updatedAt, deletedAt, startAt, lieuId` | Événement générique (réunion, sortie…) |
+| `celebrations` | `id, updatedAt, deletedAt, startAt, lieuId, celebrantPersonId, type` | Célébration liturgique |
+| `participations` | `id, updatedAt, deletedAt, subjectType, subjectId, personId` | Participant à un événement/une célébration (lien polymorphe) |
 
 Détail des champs : [ENTITIES.md](ENTITIES.md).

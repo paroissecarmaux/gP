@@ -1,22 +1,33 @@
-import { Repository } from '../db/repository.js';
+(function (gP) {
+  'use strict';
 
-export const groupRepository = new Repository('groups', 'Groupe');
-export const groupMembershipRepository = new Repository('groupMemberships', 'Participation à un groupe');
+  const groupRepository = new gP.db.Repository('groups', 'Groupe');
+  const groupMembershipRepository = new gP.db.Repository('groupMemberships', 'Participation à un groupe');
 
-export async function listMembersOf(groupId) {
-  const all = await groupMembershipRepository.list();
-  return all.filter((row) => row.groupId === groupId);
-}
+  async function listMembersOf(groupId) {
+    const all = await groupMembershipRepository.list();
+    return all.filter((row) => row.groupId === groupId);
+  }
 
-export async function listGroupsForPerson(personId) {
-  const all = await groupMembershipRepository.list();
-  return all.filter((row) => row.personId === personId);
-}
+  async function listGroupsForPerson(personId) {
+    const all = await groupMembershipRepository.list();
+    return all.filter((row) => row.personId === personId);
+  }
 
-export async function addMember(groupId, personId, { role = '', joinedDate = new Date() } = {}) {
-  return groupMembershipRepository.create({ groupId, personId, role, joinedDate, leftDate: null });
-}
+  async function addMember(groupId, personId, { role = '', joinedDate = new Date() } = {}) {
+    return groupMembershipRepository.create({ groupId, personId, role, joinedDate, leftDate: null });
+  }
 
-export async function removeMember(membershipId) {
-  return groupMembershipRepository.remove(membershipId);
-}
+  async function removeMember(membershipId) {
+    return groupMembershipRepository.remove(membershipId);
+  }
+
+  Object.assign(gP.services, {
+    groupRepository,
+    groupMembershipRepository,
+    groupsListMembersOf: listMembersOf,
+    listGroupsForPerson,
+    groupsAddMember: addMember,
+    groupsRemoveMember: removeMember,
+  });
+})(window.gP);
