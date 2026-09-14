@@ -25,36 +25,57 @@ charges.
 │   ├── db/
 │   │   ├── database.js       Instance Dexie + ouverture
 │   │   ├── schema.js          Définition des tables, une entrée par version
-│   │   └── migrations.js       Application des versions à l'instance Dexie
+│   │   ├── migrations.js       Application des versions à l'instance Dexie
+│   │   └── repository.js        CRUD générique + métadonnées (depuis V2)
 │   ├── services/             Logique métier, un fichier par domaine
-│   │   └── installation.js    (seul service nécessaire en V1)
+│   │   ├── installation.js
+│   │   ├── people.js          Personne + profils bénévole/clergé/salarié
+│   │   ├── families.js         Famille + membres
+│   │   ├── functions.js         Fonction + affectations
+│   │   ├── groups.js             Groupe + participations
+│   │   └── contacts.js            Coordonnée (partagée Personne/Famille)
 │   ├── ui/
-│   │   ├── components.js       Classe de base des composants + AppShell
+│   │   ├── components.js       Component, AppShell, ListView, FormView
 │   │   ├── router.js            Routeur hash avec paramètres
-│   │   └── notifications.js      Bandeau de notifications / erreurs
+│   │   ├── forms.js              Construction/lecture de champs de formulaire
+│   │   ├── modals.js              Boîtes de dialogue (confirmation…)
+│   │   └── notifications.js        Bandeau de notifications / erreurs
 │   └── utils/
 │       ├── uuid.js
 │       ├── syncMeta.js          Métadonnées de synchronisation
 │       ├── dates.js
-│       └── errors.js             Hiérarchie d'erreurs + gestion centralisée
+│       ├── formatting.js         Libellés d'affichage (ex. nom d'une personne)
+│       ├── indexBy.js             Indexation par id, options de <select> statiques
+│       ├── validation.js           Validation centralisée
+│       └── errors.js                Hiérarchie d'erreurs + gestion centralisée
 ├── pages/                  Écrans, un module par page/route
-│   └── dashboard.js
+│   ├── dashboard.js
+│   ├── people.js            Liste + fiche riche (coordonnées, fonctions, profils)
+│   ├── families.js           Liste + fiche riche (membres)
+│   ├── groups.js              Liste + fiche riche (membres)
+│   └── functions.js            Liste + formulaire (CRUD simple)
 ├── docs/                   Cette documentation
 └── scripts/
     └── push-to-github.ps1
 ```
 
 `services/` (logique + accès aux données) et `pages/` (écrans) sont
-volontairement séparés : un module métier futur (ex. Annuaire) ajoute
-`js/services/people.js` + `js/services/families.js` et
-`pages/annuaire.js`, sans toucher au reste.
+volontairement séparés : un module métier ajoute ses fichiers dans les
+deux dossiers sans toucher au reste.
 
-Seuls les fichiers réellement utilisés par la V1 sont créés. Les autres
-noms de fichiers/services prévus par le cahier des charges (`people.js`,
-`agenda.js`, `forms.js`, `modals.js`, `validation.js`…) apparaîtront au fil
-des versions qui en ont besoin (voir [ROADMAP.md](ROADMAP.md)) — créer des
-fichiers vides à l'avance n'apporterait rien et contredirait la règle
-« pas de gros fichiers monolithiques / pas de code mort ».
+Seuls les fichiers réellement utilisés par la version courante sont
+créés. Les autres noms de fichiers/services prévus par le cahier des
+charges (`agenda.js`, `intentions.js`…) apparaîtront au fil des versions
+qui en ont besoin (voir [ROADMAP.md](ROADMAP.md)) — créer des fichiers
+vides à l'avance n'apporterait rien et contredirait la règle « pas de gros
+fichiers monolithiques / pas de code mort ».
+
+Écart avec la liste indicative du cahier des charges (section 4) :
+`functions.js` et `groups.js` n'y figuraient pas explicitement (seuls
+`people.js`/`families.js` étaient cités pour tout l'annuaire), mais
+`Fonction` et `Groupe` sont des entités à part entière dans la section 6 —
+leur donner un fichier dédié évite de surcharger `people.js` et respecte
+mieux « un fichier par domaine métier ».
 
 ## Décisions architecturales
 
@@ -98,15 +119,32 @@ CDN. Cohérent avec « 100 % locale » et « utilisable hors connexion » dès
 le premier lancement, sans dépendre d'une disponibilité réseau — y
 compris pour charger une simple bibliothèque JS.
 
-### Pas de couche « Repository » générique
+### Couche « Repository » générique — décision révisée en V2
 
-Avec une seule entité en V1 (`Installation`), une abstraction générique de
-CRUD serait prématurée. En revanche, la logique de métadonnées
-(identifiant, horodatage, révision, suppression douce) est déjà factorisée
-dans `js/utils/syncMeta.js`, réutilisée par tous les futurs
-`services/*.js` : ça évite la duplication (règle explicite du cahier des
-charges) sans imposer une architecture générique avant d'en connaître le
-besoin réel sur plusieurs entités.
+En V1, avec une seule entité (`Installation`), une abstraction générique
+de CRUD aurait été prématurée : seule la logique de métadonnées était
+factorisée (`js/utils/syncMeta.js`). En V2, l'annuaire introduit dix
+tables d'un coup (`persons`, `families`, `familyMembers`, `coordonnees`,
+`functions`, `personFunctions`, `groups`, `groupMemberships`,
+`volunteers`, `clergy`, `employees`) : sans factorisation, le même CRUD
+(créer/lister/modifier/supprimer-doucement/restaurer) se serait dupliqué
+dix fois. `js/db/repository.js` (classe `Repository`) porte donc cette
+logique, désormais justifiée par un besoin réel et non plus anticipé —
+c'est exactement la réévaluation attendue par le cahier des charges
+(section 1 : « tu peux modifier, compléter ou réorganiser… si cela
+améliore réellement le projet »). Les futures versions (V3+) réutiliseront
+`Repository` pour chaque nouvelle table.
+
+`js/ui/components.js` fournit en miroir deux composants génériques,
+`ListView` et `FormView`, pour les entités dont l'écran est un CRUD
+simple (ex. `Fonction`). Les entités aux écrans plus riches (`Personne`,
+`Famille`, `Groupe`, qui gèrent des sous-listes liées — coordonnées,
+fonctions occupées, membres) composent des pages sur mesure
+(`pages/people.js`, `pages/families.js`, `pages/groups.js`) à partir des
+mêmes briques bas niveau (`js/ui/forms.js` : construction/lecture de
+champs, `js/ui/modals.js` : confirmation) plutôt que de forcer ce cas
+dans `ListView`/`FormView` — une page riche par entité complexe reste
+plus lisible qu'une abstraction générique essayant de tout couvrir.
 
 ## Composants et navigation
 

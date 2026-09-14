@@ -13,4 +13,24 @@ export const SCHEMA = {
     // exportés. Pas de métadonnées de synchro ici, par nature.
     localSettings: 'key',
   },
+  2: {
+    // Annuaire (voir docs/ENTITIES.md § V2).
+    persons: 'id, updatedAt, deletedAt, lastName',
+    families: 'id, updatedAt, deletedAt, name',
+    // Liaison Famille ↔ Personne, avec rôle (chef de famille, enfant…) et
+    // période — plutôt qu'un tableau d'identifiants sur `families`.
+    familyMembers: 'id, updatedAt, deletedAt, familyId, personId',
+    // Coordonnée/adresse : entité indépendante, propriétaire polymorphe
+    // (ownerType + ownerId) réutilisée par Personne et Famille.
+    coordonnees: 'id, updatedAt, deletedAt, ownerType, ownerId',
+    functions: 'id, updatedAt, deletedAt, name',
+    personFunctions: 'id, updatedAt, deletedAt, personId, functionId',
+    groups: 'id, updatedAt, deletedAt, name',
+    groupMemberships: 'id, updatedAt, deletedAt, groupId, personId',
+    // Extensions 1-1 de Personne. `&personId` = index unique Dexie : une
+    // seule fiche bénévole/clergé/salarié par personne.
+    volunteers: 'id, updatedAt, deletedAt, &personId',
+    clergy: 'id, updatedAt, deletedAt, &personId',
+    employees: 'id, updatedAt, deletedAt, &personId',
+  },
 };

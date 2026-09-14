@@ -5,7 +5,7 @@ import { SCHEMA } from './schema.js';
 // existantes lors du passage à cette version (ex. remplir un nouveau champ
 // obligatoire) — voir docs/MIGRATIONS.md pour la procédure complète.
 const UPGRADES = {
-  // 2: (tx) => { ... }
+  // 3: (tx) => { ... }
 };
 
 export function applyMigrations(db) {

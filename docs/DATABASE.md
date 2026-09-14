@@ -63,3 +63,21 @@ au-delà de la V1.
 |-------|-------------|---------|
 | `installations` | `id, updatedAt, deletedAt, originInstallationId` | Postes connus |
 | `localSettings` | `key` | Réglages locaux (non synchronisés) |
+
+### v2 — Annuaire
+
+| Table | Index Dexie | Contenu |
+|-------|-------------|---------|
+| `persons` | `id, updatedAt, deletedAt, lastName` | Personne |
+| `families` | `id, updatedAt, deletedAt, name` | Famille |
+| `familyMembers` | `id, updatedAt, deletedAt, familyId, personId` | Liaison Famille ↔ Personne (rôle) |
+| `coordonnees` | `id, updatedAt, deletedAt, ownerType, ownerId` | Adresse/contact, propriétaire polymorphe |
+| `functions` | `id, updatedAt, deletedAt, name` | Fonction (référentiel) |
+| `personFunctions` | `id, updatedAt, deletedAt, personId, functionId` | Affectation d'une fonction à une personne |
+| `groups` | `id, updatedAt, deletedAt, name` | Groupe |
+| `groupMemberships` | `id, updatedAt, deletedAt, groupId, personId` | Participation à un groupe |
+| `volunteers` | `id, updatedAt, deletedAt, &personId` | Profil bénévole (1-1, index unique) |
+| `clergy` | `id, updatedAt, deletedAt, &personId` | Profil clergé (1-1, index unique) |
+| `employees` | `id, updatedAt, deletedAt, &personId` | Profil salarié (1-1, index unique) |
+
+Détail des champs : [ENTITIES.md](ENTITIES.md).

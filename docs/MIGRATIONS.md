@@ -33,6 +33,7 @@ question d'intégrité des données (priorité n°1 du projet), pas de style.
 | Version | Contenu | Migration de données |
 |---------|---------|-----------------------|
 | 1 | `installations`, `localSettings` | — (version initiale) |
+| 2 | `persons`, `families`, `familyMembers`, `coordonnees`, `functions`, `personFunctions`, `groups`, `groupMemberships`, `volunteers`, `clergy`, `employees` | — (nouvelles tables uniquement) |
 
 Les versions suivantes seront ajoutées au fil de la [roadmap](ROADMAP.md),
 une entrée par module livré (V2 → Annuaire, V3 → Territoire/Agenda…).

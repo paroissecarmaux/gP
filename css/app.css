@@ -9,6 +9,8 @@
   --color-primary-ink: light-dark(#ffffff, #0e1a15);
   --color-danger: light-dark(#8a1f1a, #f3a29d);
   --color-danger-bg: light-dark(#fde2e1, #4a1f1e);
+  --color-success: light-dark(#1f5c3f, #8fd6b2);
+  --color-success-bg: light-dark(#e3f3ea, #17331f);
   --color-info-bg: light-dark(#eef1ef, #22271f);
   --radius: 8px;
 }
